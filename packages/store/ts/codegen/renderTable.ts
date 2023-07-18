@@ -150,7 +150,7 @@ library ${libraryName} {
     /* Delete all data for given keys${_commentSuffix} */
     function deleteRecord(${renderArguments([_typedStore, _typedTableId, _typedKeyArgs])}) internal {
       ${_keyTupleDefinition}
-      ${_store}.deleteRecord(_tableId, _keyTuple);
+      ${_store}.deleteRecord(_tableId, _keyTuple, getSchema());
     }
   `
         )
