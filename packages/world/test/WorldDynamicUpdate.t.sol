@@ -49,6 +49,7 @@ contract UpdateInFieldTest is Test, GasReporter {
     keyTuple = new bytes32[](1);
     keyTuple[0] = key;
     singletonKey = new bytes32[](0);
+    Schema schema = AddressArray.getSchema();
 
     // Initialize the data in setUp so that slots aren't warm in tests (to test cold update)
 
@@ -56,7 +57,7 @@ contract UpdateInFieldTest is Test, GasReporter {
     bytes16 name = "testTable";
 
     // Register a new table
-    tableId = world.registerTable(namespace, name, AddressArray.getSchema(), defaultKeySchema);
+    tableId = world.registerTable(namespace, name, schema, defaultKeySchema);
 
     // Create data
     initData = new address[](3);
@@ -65,7 +66,7 @@ contract UpdateInFieldTest is Test, GasReporter {
     initData[2] = address(bytes20(keccak256("another address")));
     encodedData = EncodeArray.encode(initData);
 
-    world.setField(namespace, name, keyTuple, 0, encodedData);
+    world.setField(namespace, name, keyTuple, 0, encodedData, schema);
   }
 
   // Expect an error when trying to write from an address that doesn't have access
@@ -83,6 +84,7 @@ contract UpdateInFieldTest is Test, GasReporter {
   function testPopFromField() public {
     bytes16 namespace = "DynamicUpdTest";
     bytes16 name = "testTable";
+    Schema schema = AddressArray.getSchema();
 
     // Expect the data to be written
     assertEq(AddressArray.get(world, tableId, key), initData);
@@ -91,7 +93,7 @@ contract UpdateInFieldTest is Test, GasReporter {
     uint256 byteLengthToPop = 20;
 
     startGasReport("pop 1 address (cold)");
-    world.popFromField(namespace, name, keyTuple, 0, byteLengthToPop);
+    world.popFromField(namespace, name, keyTuple, 0, byteLengthToPop, schema);
     endGasReport();
 
     // Expect the data to be updated
@@ -105,7 +107,7 @@ contract UpdateInFieldTest is Test, GasReporter {
     byteLengthToPop = 20;
 
     startGasReport("pop 1 address (warm)");
-    world.popFromField(namespace, name, keyTuple, 0, byteLengthToPop);
+    world.popFromField(namespace, name, keyTuple, 0, byteLengthToPop, schema);
     endGasReport();
 
     // Expect the data to be updated
@@ -116,10 +118,10 @@ contract UpdateInFieldTest is Test, GasReporter {
     }
 
     // Reset data
-    world.setField(namespace, name, keyTuple, 0, encodedData);
+    world.setField(namespace, name, keyTuple, 0, encodedData, schema);
     // Pop 2 items via direct access
     byteLengthToPop = 20 * 2;
-    world.popFromField(tableId, keyTuple, 0, byteLengthToPop);
+    world.popFromField(tableId, keyTuple, 0, byteLengthToPop, schema);
     // Expect the data to be updated
     loadedData = AddressArray.get(world, tableId, key);
     assertEq(loadedData.length, initData.length - 2);
@@ -129,20 +131,21 @@ contract UpdateInFieldTest is Test, GasReporter {
 
     // Expect an error when trying to write from an address that doesn't have access (via namespace/name)
     _expectAccessDenied(address(0x01), namespace, name);
-    world.popFromField(namespace, name, keyTuple, 0, 20);
+    world.popFromField(namespace, name, keyTuple, 0, 20, schema);
 
     // Expect an error when trying to write from an address that doesn't have access (via tableId)
     _expectAccessDenied(address(0x01), namespace, name);
-    world.popFromField(tableId, keyTuple, 0, 20);
+    world.popFromField(tableId, keyTuple, 0, 20, schema);
 
     // Expect the World to have access
     vm.prank(address(world));
-    world.popFromField(namespace, name, keyTuple, 0, 20);
+    world.popFromField(namespace, name, keyTuple, 0, 20, schema);
   }
 
   function testUpdateInField() public {
     bytes16 namespace = "DynamicUpdTest";
     bytes16 name = "testTable";
+    Schema schema = AddressArray.getSchema();
 
     // Expect the data to be written
     assertEq(AddressArray.get(world, tableId, key), initData);
@@ -152,11 +155,11 @@ contract UpdateInFieldTest is Test, GasReporter {
     dataForUpdate[0] = address(bytes20(keccak256("address for update")));
 
     startGasReport("updateInField 1 item (cold)");
-    world.updateInField(namespace, name, keyTuple, 0, 0, EncodeArray.encode(dataForUpdate));
+    world.updateInField(namespace, name, keyTuple, 0, 0, EncodeArray.encode(dataForUpdate), schema);
     endGasReport();
 
     startGasReport("updateInField 1 item (warm)");
-    world.updateInField(namespace, name, keyTuple, 0, 0, EncodeArray.encode(dataForUpdate));
+    world.updateInField(namespace, name, keyTuple, 0, 0, EncodeArray.encode(dataForUpdate), schema);
     endGasReport();
 
     // Expect the data to be updated
@@ -164,7 +167,7 @@ contract UpdateInFieldTest is Test, GasReporter {
     assertEq(AddressArray.get(world, tableId, key), initData);
 
     // Update index 1 via direct access
-    world.updateInField(tableId, keyTuple, 0, 20 * 1, EncodeArray.encode(dataForUpdate));
+    world.updateInField(tableId, keyTuple, 0, 20 * 1, EncodeArray.encode(dataForUpdate), schema);
 
     // Expect the data to be updated
     initData[1] = dataForUpdate[0];
@@ -172,14 +175,14 @@ contract UpdateInFieldTest is Test, GasReporter {
 
     // Expect an error when trying to write from an address that doesn't have access (via namespace/name)
     _expectAccessDenied(address(0x01), namespace, name);
-    world.updateInField(namespace, name, keyTuple, 0, 0, EncodeArray.encode(dataForUpdate));
+    world.updateInField(namespace, name, keyTuple, 0, 0, EncodeArray.encode(dataForUpdate), schema);
 
     // Expect an error when trying to write from an address that doesn't have access (via tableId)
     _expectAccessDenied(address(0x01), namespace, name);
-    world.updateInField(tableId, keyTuple, 0, 0, EncodeArray.encode(dataForUpdate));
+    world.updateInField(tableId, keyTuple, 0, 0, EncodeArray.encode(dataForUpdate), schema);
 
     // Expect the World to have access
     vm.prank(address(world));
-    world.updateInField(namespace, name, keyTuple, 0, 0, EncodeArray.encode(dataForUpdate));
+    world.updateInField(namespace, name, keyTuple, 0, 0, EncodeArray.encode(dataForUpdate), schema);
   }
 }
