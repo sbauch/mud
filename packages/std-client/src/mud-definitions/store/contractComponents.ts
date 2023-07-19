@@ -42,6 +42,24 @@ export function defineContractComponents(world: World) {
         } as const
       );
     })(),
+    TableData: (() => {
+      const tableId = new TableId("mudstore", "TableData");
+      return defineComponent(
+        world,
+        {
+          keySchema: RecsType.String,
+          valueSchema: RecsType.String,
+          abiEncodedKeyNames: RecsType.String,
+          abiEncodedValueNames: RecsType.String,
+        },
+        {
+          metadata: {
+            contractId: tableId.toHex(),
+            tableId: tableId.toString(),
+          },
+        }
+      );
+    })(),
     StoreMetadata: (() => {
       return defineComponent(
         world,

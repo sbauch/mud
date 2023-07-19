@@ -28,7 +28,7 @@ contract QueryTest is Test, GasReporter {
   bytes16 name2 = bytes16("source2");
   bytes16 name3 = bytes16("source3");
 
-  Schema tableSchema;
+  Schema tableValueSchema;
   Schema tableKeySchema;
   bytes32 table1 = ResourceSelector.from(namespace, name1);
   bytes32 table2 = ResourceSelector.from(namespace, name2);
@@ -43,7 +43,7 @@ contract QueryTest is Test, GasReporter {
   QueryFragment[] fragmentsHasNot;
 
   function setUp() public {
-    tableSchema = SchemaLib.encode(SchemaType.UINT256);
+    tableValueSchema = SchemaLib.encode(SchemaType.UINT256);
     tableKeySchema = SchemaLib.encode(SchemaType.BYTES32);
     world = IBaseWorld(address(new World()));
     world.installRootModule(new CoreModule(), new bytes(0));
@@ -61,9 +61,9 @@ contract QueryTest is Test, GasReporter {
 
   function _installKeysInTableModule() internal {
     // Register source table
-    table1 = world.registerTable(namespace, name1, tableSchema, tableKeySchema);
-    table2 = world.registerTable(namespace, name2, tableSchema, tableKeySchema);
-    table3 = world.registerTable(namespace, name3, tableSchema, tableKeySchema);
+    table1 = world.registerTable(namespace, name1, tableKeySchema, tableValueSchema, new string[](1), new string[](1));
+    table2 = world.registerTable(namespace, name2, tableKeySchema, tableValueSchema, new string[](1), new string[](1));
+    table3 = world.registerTable(namespace, name3, tableKeySchema, tableValueSchema, new string[](1), new string[](1));
 
     // Install the index module
     // TODO: add support for installing this via installModule
@@ -85,9 +85,9 @@ contract QueryTest is Test, GasReporter {
   function testHasQuery() public {
     _installKeysInTableModule();
 
-    world.setRecord(namespace, name1, key1, abi.encode(1), tableSchema);
-    world.setRecord(namespace, name1, key2, abi.encode(1), tableSchema);
-    world.setRecord(namespace, name2, key1, abi.encode(0), tableSchema);
+    world.setRecord(namespace, name1, key1, abi.encode(1), tableValueSchema);
+    world.setRecord(namespace, name1, key2, abi.encode(1), tableValueSchema);
+    world.setRecord(namespace, name2, key1, abi.encode(0), tableValueSchema);
 
     // Query should return all keys in table1
     QueryFragment[] memory fragments = new QueryFragment[](1);
@@ -106,9 +106,9 @@ contract QueryTest is Test, GasReporter {
     _installKeysInTableModule();
     _installKeysWithValueModule();
 
-    world.setRecord(namespace, name1, key1, abi.encode(2), tableSchema);
-    world.setRecord(namespace, name1, key2, abi.encode(1), tableSchema);
-    world.setRecord(namespace, name1, key3, abi.encode(1), tableSchema);
+    world.setRecord(namespace, name1, key1, abi.encode(2), tableValueSchema);
+    world.setRecord(namespace, name1, key2, abi.encode(1), tableValueSchema);
+    world.setRecord(namespace, name1, key3, abi.encode(1), tableValueSchema);
     // Query should return all keys in table1 with value 1
     QueryFragment[] memory fragments = new QueryFragment[](1);
     fragments[0] = QueryFragment(QueryType.HasValue, table1, abi.encode(1));
@@ -124,12 +124,12 @@ contract QueryTest is Test, GasReporter {
   function testCombinedHasQuery() public {
     _installKeysInTableModule();
 
-    world.setRecord(namespace, name1, key1, abi.encode(2), tableSchema);
-    world.setRecord(namespace, name1, key2, abi.encode(1), tableSchema);
-    world.setRecord(namespace, name1, key3, abi.encode(1), tableSchema);
-    world.setRecord(namespace, name2, key2, abi.encode(1), tableSchema);
-    world.setRecord(namespace, name2, key3, abi.encode(1), tableSchema);
-    world.setRecord(namespace, name3, key1, abi.encode(1), tableSchema);
+    world.setRecord(namespace, name1, key1, abi.encode(2), tableValueSchema);
+    world.setRecord(namespace, name1, key2, abi.encode(1), tableValueSchema);
+    world.setRecord(namespace, name1, key3, abi.encode(1), tableValueSchema);
+    world.setRecord(namespace, name2, key2, abi.encode(1), tableValueSchema);
+    world.setRecord(namespace, name2, key3, abi.encode(1), tableValueSchema);
+    world.setRecord(namespace, name3, key1, abi.encode(1), tableValueSchema);
 
     // Query should return all entities that have table1 and table2
     QueryFragment[] memory fragments = new QueryFragment[](2);
@@ -148,12 +148,12 @@ contract QueryTest is Test, GasReporter {
     _installKeysInTableModule();
     _installKeysWithValueModule();
 
-    world.setRecord(namespace, name1, key1, abi.encode(2), tableSchema);
-    world.setRecord(namespace, name1, key2, abi.encode(2), tableSchema);
-    world.setRecord(namespace, name1, key3, abi.encode(1), tableSchema);
-    world.setRecord(namespace, name2, key2, abi.encode(1), tableSchema);
-    world.setRecord(namespace, name2, key3, abi.encode(1), tableSchema);
-    world.setRecord(namespace, name3, key1, abi.encode(1), tableSchema);
+    world.setRecord(namespace, name1, key1, abi.encode(2), tableValueSchema);
+    world.setRecord(namespace, name1, key2, abi.encode(2), tableValueSchema);
+    world.setRecord(namespace, name1, key3, abi.encode(1), tableValueSchema);
+    world.setRecord(namespace, name2, key2, abi.encode(1), tableValueSchema);
+    world.setRecord(namespace, name2, key3, abi.encode(1), tableValueSchema);
+    world.setRecord(namespace, name3, key1, abi.encode(1), tableValueSchema);
 
     // Query should return all entities that have table1 and table2
     QueryFragment[] memory fragments = new QueryFragment[](2);
@@ -171,13 +171,13 @@ contract QueryTest is Test, GasReporter {
     _installKeysInTableModule();
     _installKeysWithValueModule();
 
-    world.setRecord(namespace, name1, key1, abi.encode(1), tableSchema);
-    world.setRecord(namespace, name1, key2, abi.encode(1), tableSchema);
-    world.setRecord(namespace, name1, key3, abi.encode(1), tableSchema);
-    world.setRecord(namespace, name2, key1, abi.encode(1), tableSchema);
-    world.setRecord(namespace, name2, key2, abi.encode(2), tableSchema);
-    world.setRecord(namespace, name2, key3, abi.encode(2), tableSchema);
-    world.setRecord(namespace, name2, key4, abi.encode(2), tableSchema);
+    world.setRecord(namespace, name1, key1, abi.encode(1), tableValueSchema);
+    world.setRecord(namespace, name1, key2, abi.encode(1), tableValueSchema);
+    world.setRecord(namespace, name1, key3, abi.encode(1), tableValueSchema);
+    world.setRecord(namespace, name2, key1, abi.encode(1), tableValueSchema);
+    world.setRecord(namespace, name2, key2, abi.encode(2), tableValueSchema);
+    world.setRecord(namespace, name2, key3, abi.encode(2), tableValueSchema);
+    world.setRecord(namespace, name2, key4, abi.encode(2), tableValueSchema);
 
     // Query should return all entities that have table1 and table2
     QueryFragment[] memory fragments = new QueryFragment[](2);
@@ -195,13 +195,13 @@ contract QueryTest is Test, GasReporter {
   function testCombinedHasNotQuery() public {
     _installKeysInTableModule();
 
-    world.setRecord(namespace, name1, key1, abi.encode(1), tableSchema);
-    world.setRecord(namespace, name1, key2, abi.encode(1), tableSchema);
-    world.setRecord(namespace, name1, key3, abi.encode(1), tableSchema);
-    world.setRecord(namespace, name2, key1, abi.encode(1), tableSchema);
-    world.setRecord(namespace, name2, key2, abi.encode(2), tableSchema);
-    world.setRecord(namespace, name2, key3, abi.encode(2), tableSchema);
-    world.setRecord(namespace, name2, key4, abi.encode(2), tableSchema);
+    world.setRecord(namespace, name1, key1, abi.encode(1), tableValueSchema);
+    world.setRecord(namespace, name1, key2, abi.encode(1), tableValueSchema);
+    world.setRecord(namespace, name1, key3, abi.encode(1), tableValueSchema);
+    world.setRecord(namespace, name2, key1, abi.encode(1), tableValueSchema);
+    world.setRecord(namespace, name2, key2, abi.encode(2), tableValueSchema);
+    world.setRecord(namespace, name2, key3, abi.encode(2), tableValueSchema);
+    world.setRecord(namespace, name2, key4, abi.encode(2), tableValueSchema);
 
     // Query should return all entities that have table1 and table2
     QueryFragment[] memory fragments = new QueryFragment[](2);
@@ -219,13 +219,13 @@ contract QueryTest is Test, GasReporter {
     _installKeysInTableModule();
     _installKeysWithValueModule();
 
-    world.setRecord(namespace, name1, key1, abi.encode(1), tableSchema);
-    world.setRecord(namespace, name1, key2, abi.encode(1), tableSchema);
-    world.setRecord(namespace, name1, key3, abi.encode(1), tableSchema);
-    world.setRecord(namespace, name2, key1, abi.encode(1), tableSchema);
-    world.setRecord(namespace, name2, key2, abi.encode(2), tableSchema);
-    world.setRecord(namespace, name2, key3, abi.encode(1), tableSchema);
-    world.setRecord(namespace, name2, key4, abi.encode(1), tableSchema);
+    world.setRecord(namespace, name1, key1, abi.encode(1), tableValueSchema);
+    world.setRecord(namespace, name1, key2, abi.encode(1), tableValueSchema);
+    world.setRecord(namespace, name1, key3, abi.encode(1), tableValueSchema);
+    world.setRecord(namespace, name2, key1, abi.encode(1), tableValueSchema);
+    world.setRecord(namespace, name2, key2, abi.encode(2), tableValueSchema);
+    world.setRecord(namespace, name2, key3, abi.encode(1), tableValueSchema);
+    world.setRecord(namespace, name2, key4, abi.encode(1), tableValueSchema);
 
     // Query should return all entities that have table1 and table2
     QueryFragment[] memory fragments = new QueryFragment[](2);
@@ -243,16 +243,16 @@ contract QueryTest is Test, GasReporter {
     _installKeysInTableModule();
     _installKeysWithValueModule();
 
-    world.setRecord(namespace, name1, key1, abi.encode(1), tableSchema);
-    world.setRecord(namespace, name1, key2, abi.encode(1), tableSchema);
-    world.setRecord(namespace, name1, key3, abi.encode(1), tableSchema);
-    world.setRecord(namespace, name2, key1, abi.encode(1), tableSchema);
-    world.setRecord(namespace, name2, key2, abi.encode(2), tableSchema);
-    world.setRecord(namespace, name2, key3, abi.encode(1), tableSchema);
-    world.setRecord(namespace, name2, key4, abi.encode(1), tableSchema);
-    world.setRecord(namespace, name3, key2, abi.encode(1), tableSchema);
-    world.setRecord(namespace, name3, key3, abi.encode(1), tableSchema);
-    world.setRecord(namespace, name3, key4, abi.encode(1), tableSchema);
+    world.setRecord(namespace, name1, key1, abi.encode(1), tableValueSchema);
+    world.setRecord(namespace, name1, key2, abi.encode(1), tableValueSchema);
+    world.setRecord(namespace, name1, key3, abi.encode(1), tableValueSchema);
+    world.setRecord(namespace, name2, key1, abi.encode(1), tableValueSchema);
+    world.setRecord(namespace, name2, key2, abi.encode(2), tableValueSchema);
+    world.setRecord(namespace, name2, key3, abi.encode(1), tableValueSchema);
+    world.setRecord(namespace, name2, key4, abi.encode(1), tableValueSchema);
+    world.setRecord(namespace, name3, key2, abi.encode(1), tableValueSchema);
+    world.setRecord(namespace, name3, key3, abi.encode(1), tableValueSchema);
+    world.setRecord(namespace, name3, key4, abi.encode(1), tableValueSchema);
 
     // Query should return all entities that have table2 and not table1
     QueryFragment[] memory fragments = new QueryFragment[](3);
@@ -271,9 +271,9 @@ contract QueryTest is Test, GasReporter {
     _installKeysInTableModule();
     _installKeysWithValueModule();
 
-    world.setRecord(namespace, name1, key1, abi.encode(4), tableSchema);
-    world.setRecord(namespace, name1, key2, abi.encode(5), tableSchema);
-    world.setRecord(namespace, name1, key3, abi.encode(6), tableSchema);
+    world.setRecord(namespace, name1, key1, abi.encode(4), tableValueSchema);
+    world.setRecord(namespace, name1, key2, abi.encode(5), tableValueSchema);
+    world.setRecord(namespace, name1, key3, abi.encode(6), tableValueSchema);
 
     // Query should return all entities with table1 except value 6
     QueryFragment[] memory fragments = new QueryFragment[](2);
@@ -294,9 +294,9 @@ contract QueryTest is Test, GasReporter {
     for (uint256 i; i < 100; i++) {
       bytes32[] memory key = new bytes32[](1);
       key[0] = bytes32(i);
-      world.setRecord(namespace, name1, key, abi.encode(1), tableSchema);
+      world.setRecord(namespace, name1, key, abi.encode(1), tableValueSchema);
     }
-    world.setRecord(namespace, name2, key1, abi.encode(0), tableSchema);
+    world.setRecord(namespace, name2, key1, abi.encode(0), tableValueSchema);
 
     // Query should return all keys in table1
     QueryFragment[] memory fragments = new QueryFragment[](1);
@@ -315,9 +315,9 @@ contract QueryTest is Test, GasReporter {
     for (uint256 i; i < 1000; i++) {
       bytes32[] memory key = new bytes32[](1);
       key[0] = bytes32(i);
-      world.setRecord(namespace, name1, key, abi.encode(1), tableSchema);
+      world.setRecord(namespace, name1, key, abi.encode(1), tableValueSchema);
     }
-    world.setRecord(namespace, name2, key1, abi.encode(0), tableSchema);
+    world.setRecord(namespace, name2, key1, abi.encode(0), tableValueSchema);
 
     // Query should return all keys in table1
     QueryFragment[] memory fragments = new QueryFragment[](1);

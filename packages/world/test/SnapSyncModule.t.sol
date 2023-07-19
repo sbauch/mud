@@ -44,7 +44,7 @@ contract SnapSyncModuleTest is Test, GasReporter {
   bytes32 key2 = keccak256("test2");
   bytes32[] keyTuple2;
 
-  Schema tableSchema;
+  Schema tableValueSchema;
   Schema tableKeySchema;
   Schema singletonKeySchema;
   Schema compositeKeySchema;
@@ -56,7 +56,7 @@ contract SnapSyncModuleTest is Test, GasReporter {
   uint256 val2 = 42;
 
   function setUp() public {
-    tableSchema = SchemaLib.encode(SchemaType.UINT256);
+    tableValueSchema = SchemaLib.encode(SchemaType.UINT256);
     tableKeySchema = SchemaLib.encode(SchemaType.BYTES32);
     compositeKeySchema = SchemaLib.encode(SchemaType.BYTES32, SchemaType.BYTES32, SchemaType.BYTES32);
 
@@ -73,9 +73,23 @@ contract SnapSyncModuleTest is Test, GasReporter {
 
   function _installModules() internal {
     // Register source table
-    tableId = world.registerTable(namespace, name, tableSchema, tableKeySchema);
-    singletonTableId = world.registerTable(namespace, singletonName, tableSchema, singletonKeySchema);
-    compositeTableId = world.registerTable(namespace, compositeName, tableSchema, compositeKeySchema);
+    tableId = world.registerTable(namespace, name, tableKeySchema, tableValueSchema, new string[](1), new string[](1));
+    singletonTableId = world.registerTable(
+      namespace,
+      singletonName,
+      singletonKeySchema,
+      tableValueSchema,
+      new string[](0),
+      new string[](1)
+    );
+    compositeTableId = world.registerTable(
+      namespace,
+      compositeName,
+      compositeKeySchema,
+      tableValueSchema,
+      new string[](3),
+      new string[](1)
+    );
 
     world.installRootModule(keysInTableModule, abi.encode(tableId));
     world.installRootModule(keysInTableModule, abi.encode(singletonTableId));
@@ -87,7 +101,7 @@ contract SnapSyncModuleTest is Test, GasReporter {
     _installModules();
 
     // Set a value in the source table
-    world.setRecord(namespace, name, keyTuple1, abi.encodePacked(value1), tableSchema);
+    world.setRecord(namespace, name, keyTuple1, abi.encodePacked(value1), tableValueSchema);
 
     uint256 limit = ISnapSyncSystem(address(world)).snapSync_system_getNumKeysInTable(tableId);
 
@@ -101,7 +115,7 @@ contract SnapSyncModuleTest is Test, GasReporter {
     assertEq(records[0].value, abi.encodePacked(value1));
 
     // Set another key with a different value
-    world.setRecord(namespace, name, keyTuple2, abi.encodePacked(value2), tableSchema);
+    world.setRecord(namespace, name, keyTuple2, abi.encodePacked(value2), tableValueSchema);
 
     limit = ISnapSyncSystem(address(world)).snapSync_system_getNumKeysInTable(tableId);
 
@@ -136,7 +150,7 @@ contract SnapSyncModuleTest is Test, GasReporter {
     ISnapSyncSystem syncSystem = ISnapSyncSystem(address(world));
 
     // Set a value in the source table
-    world.setRecord(namespace, compositeName, keyTupleA, abi.encodePacked(value1), tableSchema);
+    world.setRecord(namespace, compositeName, keyTupleA, abi.encodePacked(value1), tableValueSchema);
 
     uint256 limit = syncSystem.snapSync_system_getNumKeysInTable(compositeTableId);
 
@@ -152,7 +166,7 @@ contract SnapSyncModuleTest is Test, GasReporter {
     assertEq(records[0].value, abi.encodePacked(value1));
 
     // Set another key with a different value
-    world.setRecord(namespace, compositeName, keyTupleB, abi.encodePacked(value2), tableSchema);
+    world.setRecord(namespace, compositeName, keyTupleB, abi.encodePacked(value2), tableValueSchema);
 
     limit = syncSystem.snapSync_system_getNumKeysInTable(compositeTableId);
 
@@ -183,7 +197,7 @@ contract SnapSyncModuleTest is Test, GasReporter {
     keyTupleB[2] = "B3";
 
     // Set a value in the source table
-    world.setRecord(namespace, compositeName, keyTupleA, abi.encodePacked(value1), tableSchema);
+    world.setRecord(namespace, compositeName, keyTupleA, abi.encodePacked(value1), tableValueSchema);
 
     ISnapSyncSystem syncSystem = ISnapSyncSystem(address(world));
 
@@ -201,7 +215,7 @@ contract SnapSyncModuleTest is Test, GasReporter {
     assertEq(records[0].value, abi.encodePacked(value1));
 
     // Set another key with a different value
-    world.setRecord(namespace, compositeName, keyTupleB, abi.encodePacked(value2), tableSchema);
+    world.setRecord(namespace, compositeName, keyTupleB, abi.encodePacked(value2), tableValueSchema);
 
     limit = syncSystem.snapSync_system_getNumKeysInTable(compositeTableId);
 
