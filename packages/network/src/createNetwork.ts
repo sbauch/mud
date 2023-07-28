@@ -86,6 +86,9 @@ export async function createNetwork(initialConfig: NetworkConfig) {
       chain,
       transport: fallback([webSocket(), http()]),
       pollingInterval: config.provider.options?.pollingInterval ?? config.clock.period ?? 1000,
+      batch: {
+        multicall: true,
+      }
     });
     const burnerAccount = config.privateKey ? privateKeyToAccount(config.privateKey as Address) : null;
     const burnerWalletClient = burnerAccount
