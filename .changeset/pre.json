@@ -30,15 +30,20 @@
     "@latticexyz/world": "1.42.0"
   },
   "changesets": [
+    "afraid-hotels-bathe",
+    "big-goats-prove",
+    "brave-rings-tickle",
     "eighty-tigers-argue",
     "fast-ears-hug",
     "itchy-kids-relax",
     "many-phones-study",
+    "mean-pans-study",
     "modern-bikes-build",
     "nasty-waves-divide",
     "nice-pandas-knock",
     "olive-parrots-move",
     "perfect-mangos-cry",
+    "pink-horses-deny",
     "quick-numbers-flash",
     "rare-planes-draw",
     "selfish-cycles-retire",
@@ -48,6 +53,7 @@
     "strange-candles-shout",
     "strange-ducks-float",
     "thin-buses-reply",
-    "tricky-frogs-beam"
+    "tricky-frogs-beam",
+    "weak-mails-cross"
   ]
 }

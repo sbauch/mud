@@ -1,5 +1,17 @@
 # @latticexyz/store-sync
 
+## 2.0.0-next.1
+
+### Patch Changes
+
+- Updated dependencies [[`c963b46c`](https://github.com/latticexyz/mud/commit/c963b46c7eaceebc652930936643365b8c48a021), [`b02f9d0e`](https://github.com/latticexyz/mud/commit/b02f9d0e43089e5f9b46d817ea2032ce0a1b0b07)]:
+  - @latticexyz/store@2.0.0-next.1
+  - @latticexyz/schema-type@2.0.0-next.1
+  - @latticexyz/store-cache@2.0.0-next.1
+  - @latticexyz/block-logs-stream@2.0.0-next.1
+  - @latticexyz/common@2.0.0-next.1
+  - @latticexyz/protocol-parser@2.0.0-next.1
+
 ## 2.0.0-next.0
 
 ### Minor Changes
